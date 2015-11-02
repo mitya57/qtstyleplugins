@@ -211,18 +211,6 @@ void QGtk3ColorDialogHelper::applyOptions()
     gtk_window_set_title(GTK_WINDOW(gtkDialog), options()->windowTitle().toUtf8());
 
     gtk_color_chooser_set_use_alpha(GTK_COLOR_CHOOSER(gtkDialog), options()->testOption(QColorDialogOptions::ShowAlphaChannel));
-
-    // TODO:
-//    GtkWidget *okButton = 0;
-//    GtkWidget *cancelButton = 0;
-//    GtkWidget *helpButton = 0;
-//    g_object_get(G_OBJECT(gtkDialog), "ok-button", &okButton, "cancel-button", &cancelButton, "help-button", &helpButton, NULL);
-//    if (okButton)
-//        g_object_set(G_OBJECT(okButton), "visible", !options()->testOption(QColorDialogOptions::NoButtons), NULL);
-//    if (cancelButton)
-//        g_object_set(G_OBJECT(cancelButton), "visible", !options()->testOption(QColorDialogOptions::NoButtons), NULL);
-//    if (helpButton)
-//        gtk_widget_hide(helpButton);
 }
 
 QGtk3FileDialogHelper::QGtk3FileDialogHelper()
@@ -589,14 +577,6 @@ void QGtk3FontDialogHelper::applyOptions()
     const QSharedPointer<QFontDialogOptions> &opts = options();
 
     gtk_window_set_title(GTK_WINDOW(gtkDialog), opts->windowTitle().toUtf8());
-
-    // TODO:
-//    GtkWidget *okButton = gtk_font_selection_dialog_get_ok_button(GTK_FONT_SELECTION_DIALOG(gtkDialog));
-//    GtkWidget *cancelButton = gtk_font_selection_dialog_get_cancel_button(GTK_FONT_SELECTION_DIALOG(gtkDialog));
-//    if (okButton)
-//        gtk_widget_set_visible(okButton, !options()->testOption(QFontDialogOptions::NoButtons));
-//    if (cancelButton)
-//        gtk_widget_set_visible(cancelButton, !options()->testOption(QFontDialogOptions::NoButtons));
 }
 
 QT_END_NAMESPACE
