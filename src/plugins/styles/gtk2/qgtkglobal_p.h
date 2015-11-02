@@ -31,15 +31,8 @@
 **
 ****************************************************************************/
 
-#include <QtCore/qglobal.h>
-#include <QtCore/qpoint.h>
-#include <QtCore/qstring.h>
-#include <QtGui/qpolygon.h>
-#include <QtCore/qstringbuilder.h>
-#include <QtGui/qaccessible.h>
-
-#ifndef QSTYLEHELPER_P_H
-#define QSTYLEHELPER_P_H
+#ifndef QGTKGLOBAL_P_H
+#define QGTKGLOBAL_P_H
 
 //
 //  W A R N I N G
@@ -52,37 +45,36 @@
 // We mean it.
 //
 
-#include "qhexstring_p.h"
+#include <QtCore/qglobal.h>
+
+#undef signals // Collides with GTK symbols
+#include <gtk/gtk.h>
+
+typedef unsigned long XID;
+
+#undef GTK_OBJECT_FLAGS
+#define GTK_OBJECT_FLAGS(obj)(((GtkObject*)(obj))->flags)
+
+#define QLS(x) QLatin1String(x)
 
 QT_BEGIN_NAMESPACE
 
-class QPainter;
-class QPixmap;
-class QStyleOptionSlider;
-class QStyleOption;
-class QWindow;
-
-namespace QStyleHelper
-{
-    QString uniqueName(const QString &key, const QStyleOption *option, const QSize &size);
-#ifndef QT_NO_DIAL
-    qreal angle(const QPointF &p1, const QPointF &p2);
-    QPolygonF calcLines(const QStyleOptionSlider *dial);
-    int calcBigLineSize(int radius);
-    void drawDial(const QStyleOptionSlider *dial, QPainter *painter);
-#endif //QT_NO_DIAL
-    void drawBorderPixmap(const QPixmap &pixmap, QPainter *painter, const QRect &rect,
-                     int left = 0, int top = 0, int right = 0,
-                     int bottom = 0);
-#ifndef QT_NO_ACCESSIBILITY
-    bool isInstanceOf(QObject *obj, QAccessible::Role role);
-    bool hasAncestor(QObject *obj, QAccessible::Role role);
+#if Q_BYTE_ORDER == Q_BIG_ENDIAN
+#   define QT_RED 3
+#   define QT_GREEN 2
+#   define QT_BLUE 1
+#   define QT_ALPHA 0
+#else
+#   define QT_RED 0
+#   define QT_GREEN 1
+#   define QT_BLUE 2
+#   define QT_ALPHA 3
 #endif
-    QColor backgroundColor(const QPalette &pal, const QWidget* widget = 0);
-    QWindow *styleObjectWindow(QObject *so);
-}
-
+#   define GTK_RED 2
+#   define GTK_GREEN 1
+#   define GTK_BLUE 0
+#   define GTK_ALPHA 3
 
 QT_END_NAMESPACE
 
-#endif // QSTYLEHELPER_P_H
+#endif // QGTKGLOBAL_P_H
