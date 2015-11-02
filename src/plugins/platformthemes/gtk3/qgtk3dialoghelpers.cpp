@@ -1,39 +1,31 @@
 /****************************************************************************
 **
-** Copyright (C) 2014 Digia Plc and/or its subsidiary(-ies).
-** Contact: http://www.qt-project.org/legal
+** Copyright (C) 2015 The Qt Company Ltd.
+** Contact: http://www.qt.io/licensing/
 **
 ** This file is part of the plugins of the Qt Toolkit.
 **
-** $QT_BEGIN_LICENSE:LGPL$
+** $QT_BEGIN_LICENSE:LGPL21$
 ** Commercial License Usage
 ** Licensees holding valid commercial Qt licenses may use this file in
 ** accordance with the commercial license agreement provided with the
 ** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and Digia.  For licensing terms and
-** conditions see http://qt.digia.com/licensing.  For further information
-** use the contact form at http://qt.digia.com/contact-us.
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see http://www.qt.io/terms-conditions. For further
+** information use the contact form at http://www.qt.io/contact-us.
 **
 ** GNU Lesser General Public License Usage
 ** Alternatively, this file may be used under the terms of the GNU Lesser
-** General Public License version 2.1 as published by the Free Software
-** Foundation and appearing in the file LICENSE.LGPL included in the
-** packaging of this file.  Please review the following information to
-** ensure the GNU Lesser General Public License version 2.1 requirements
-** will be met: http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html.
+** General Public License version 2.1 or version 3 as published by the Free
+** Software Foundation and appearing in the file LICENSE.LGPLv21 and
+** LICENSE.LGPLv3 included in the packaging of this file. Please review the
+** following information to ensure the GNU Lesser General Public License
+** requirements will be met: https://www.gnu.org/licenses/lgpl.html and
+** http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html.
 **
-** In addition, as a special exception, Digia gives you certain additional
-** rights.  These rights are described in the Digia Qt LGPL Exception
+** As a special exception, The Qt Company gives you certain additional
+** rights. These rights are described in The Qt Company LGPL Exception
 ** version 1.1, included in the file LGPL_EXCEPTION.txt in this package.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3.0 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.  Please review the following information to
-** ensure the GNU General Public License version 3.0 requirements will be
-** met: http://www.gnu.org/copyleft/gpl.html.
-**
 **
 ** $QT_END_LICENSE$
 **
@@ -48,6 +40,7 @@
 #include <qfont.h>
 
 #include <private/qguiapplication_p.h>
+#include <qpa/qplatformfontdatabase.h>
 
 #undef signals
 #include <gtk/gtk.h>
@@ -65,7 +58,7 @@ public:
     QGtk3Dialog(GtkWidget *gtkWidget);
     ~QGtk3Dialog();
 
-    GtkDialog* gtkDialog() const;
+    GtkDialog *gtkDialog() const;
 
     void exec();
     bool show(Qt::WindowFlags flags, Qt::WindowModality modality, QWindow *parent);
@@ -93,7 +86,7 @@ QGtk3Dialog::~QGtk3Dialog()
     gtk_widget_destroy(gtkWidget);
 }
 
-GtkDialog* QGtk3Dialog::gtkDialog() const
+GtkDialog *QGtk3Dialog::gtkDialog() const
 {
     return GTK_DIALOG(gtkWidget);
 }
@@ -305,7 +298,13 @@ QUrl QGtk3FileDialogHelper::directory() const
 void QGtk3FileDialogHelper::selectFile(const QUrl &filename)
 {
     GtkDialog *gtkDialog = d->gtkDialog();
-    gtk_file_chooser_select_filename(GTK_FILE_CHOOSER(gtkDialog), filename.toLocalFile().toUtf8());
+    if (options()->acceptMode() == QFileDialogOptions::AcceptSave) {
+        QFileInfo fi(filename.toLocalFile());
+        gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(gtkDialog), fi.path().toUtf8());
+        gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(gtkDialog), fi.fileName().toUtf8());
+    } else {
+        gtk_file_chooser_select_filename(GTK_FILE_CHOOSER(gtkDialog), filename.toLocalFile().toUtf8());
+    }
 }
 
 QList<QUrl> QGtk3FileDialogHelper::selectedFiles() const
@@ -506,14 +505,22 @@ static QString qt_fontToString(const QFont &font)
     int weight = font.weight();
     if (weight >= QFont::Black)
         pango_font_description_set_weight(desc, PANGO_WEIGHT_HEAVY);
+    else if (weight >= QFont::ExtraBold)
+        pango_font_description_set_weight(desc, PANGO_WEIGHT_ULTRABOLD);
     else if (weight >= QFont::Bold)
         pango_font_description_set_weight(desc, PANGO_WEIGHT_BOLD);
     else if (weight >= QFont::DemiBold)
         pango_font_description_set_weight(desc, PANGO_WEIGHT_SEMIBOLD);
+    else if (weight >= QFont::Medium)
+        pango_font_description_set_weight(desc, PANGO_WEIGHT_MEDIUM);
     else if (weight >= QFont::Normal)
         pango_font_description_set_weight(desc, PANGO_WEIGHT_NORMAL);
-    else
+    else if (weight >= QFont::Light)
         pango_font_description_set_weight(desc, PANGO_WEIGHT_LIGHT);
+    else if (weight >= QFont::ExtraLight)
+        pango_font_description_set_weight(desc, PANGO_WEIGHT_ULTRALIGHT);
+    else
+        pango_font_description_set_weight(desc, PANGO_WEIGHT_THIN);
 
     int style = font.style();
     if (style == QFont::StyleItalic)
@@ -540,17 +547,8 @@ static QFont qt_fontFromString(const QString &name)
     if (!family.isEmpty())
         font.setFamily(family);
 
-    int weight = pango_font_description_get_weight(desc);
-    if (weight >= PANGO_WEIGHT_HEAVY)
-        font.setWeight(QFont::Black);
-    else if (weight >= PANGO_WEIGHT_BOLD)
-        font.setWeight(QFont::Bold);
-    else if (weight >= PANGO_WEIGHT_SEMIBOLD)
-        font.setWeight(QFont::DemiBold);
-    else if (weight >= PANGO_WEIGHT_NORMAL)
-        font.setWeight(QFont::Normal);
-    else
-        font.setWeight(QFont::Light);
+    const int weight = pango_font_description_get_weight(desc);
+    font.setWeight(QPlatformFontDatabase::weightFromInteger(weight));
 
     PangoStyle style = pango_font_description_get_style(desc);
     if (style == PANGO_STYLE_ITALIC)
