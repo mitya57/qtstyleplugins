@@ -38,6 +38,8 @@
 #undef signals
 #include <gtk/gtk.h>
 
+#include <X11/Xlib.h>
+
 QT_BEGIN_NAMESPACE
 
 const char *QGtk3Theme::name = "gtk3";
@@ -68,7 +70,13 @@ void gtkMessageHandler(const gchar *log_domain,
 
 QGtk3Theme::QGtk3Theme()
 {
+    // gtk_init will reset the Xlib error handler, and that causes
+    // Qt applications to quit on X errors. Therefore, we need to manually restore it.
+    int (*oldErrorHandler)(Display *, XErrorEvent *) = XSetErrorHandler(NULL);
+
     gtk_init(0, 0);
+
+    XSetErrorHandler(oldErrorHandler);
 
     /* Initialize some types here so that Gtk+ does not crash when reading
      * the treemodel for GtkFontChooser.
