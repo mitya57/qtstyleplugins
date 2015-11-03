@@ -72,14 +72,9 @@ QGtk3Theme::QGtk3Theme()
 
     /* Initialize some types here so that Gtk+ does not crash when reading
      * the treemodel for GtkFontChooser.
-     *
-     * We have to use asserts here as otherwise GCC optimizes out the
-     * pango_*_get_type() calls.
      */
-    GType pango_font_family_type = pango_font_family_get_type();
-    GType pango_font_face_type = pango_font_face_get_type();
-    g_assert(pango_font_family_type > 0);
-    g_assert(pango_font_face_type > 0);
+    g_type_ensure(PANGO_TYPE_FONT_FAMILY);
+    g_type_ensure(PANGO_TYPE_FONT_FACE);
 
     /* Use our custom log handler. */
     g_log_set_handler("Gtk", G_LOG_LEVEL_MESSAGE, gtkMessageHandler, NULL);
