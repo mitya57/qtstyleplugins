@@ -91,12 +91,10 @@ QGtk3Theme::QGtk3Theme()
 QVariant QGtk3Theme::themeHint(QPlatformTheme::ThemeHint hint) const
 {
     switch (hint) {
-    case QPlatformTheme::StyleNames:
-        return QStringList() << QStringLiteral("gtk3") << QStringLiteral("fusion");
     case QPlatformTheme::SystemIconThemeName:
-        return gtkSetting("gtk-icon-theme-name");
+        return QVariant(gtkSetting("gtk-icon-theme-name"));
     case QPlatformTheme::SystemIconFallbackThemeName:
-        return gtkSetting("gtk-fallback-icon-theme");
+        return QVariant(gtkSetting("gtk-fallback-icon-theme"));
     default:
         return QGnomeTheme::themeHint(hint);
     }
