@@ -52,6 +52,20 @@ static QString gtkSetting(const gchar *propertyName)
     return str;
 }
 
+void gtkMessageHandler(const gchar *log_domain,
+                       GLogLevelFlags log_level,
+                       const gchar *message,
+                       gpointer unused_data) {
+    /* Silence false-positive Gtk warnings (we are using Xlib to set
+     * the WM_TRANSIENT_FOR hint).
+     */
+    if (g_strcmp0(message, "GtkDialog mapped without a transient parent. "
+                           "This is discouraged.") != 0) {
+        /* For other messages, call the default handler. */
+        g_log_default_handler(log_domain, log_level, message, unused_data);
+    }
+}
+
 QGtk3Theme::QGtk3Theme()
 {
     gtk_init(0, 0);
@@ -66,6 +80,9 @@ QGtk3Theme::QGtk3Theme()
     GType pango_font_face_type = pango_font_face_get_type();
     g_assert(pango_font_family_type > 0);
     g_assert(pango_font_face_type > 0);
+
+    /* Use our custom log handler. */
+    g_log_set_handler("Gtk", G_LOG_LEVEL_MESSAGE, gtkMessageHandler, NULL);
 }
 
 QVariant QGtk3Theme::themeHint(QPlatformTheme::ThemeHint hint) const
