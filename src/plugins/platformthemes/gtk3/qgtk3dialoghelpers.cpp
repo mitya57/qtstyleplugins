@@ -127,6 +127,7 @@ bool QGtk3Dialog::show(Qt::WindowFlags flags, Qt::WindowModality modality, QWind
     }
 
     gtk_widget_show(gtkWidget);
+    gdk_window_focus(gdkWindow, GDK_CURRENT_TIME);
     return true;
 }
 
