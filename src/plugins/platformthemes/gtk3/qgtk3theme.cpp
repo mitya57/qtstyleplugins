@@ -55,6 +55,17 @@ static QString gtkSetting(const gchar *propertyName)
 QGtk3Theme::QGtk3Theme()
 {
     gtk_init(0, 0);
+
+    /* Initialize some types here so that Gtk+ does not crash when reading
+     * the treemodel for GtkFontChooser.
+     *
+     * We have to use asserts here as otherwise GCC optimizes out the
+     * pango_*_get_type() calls.
+     */
+    GType pango_font_family_type = pango_font_family_get_type();
+    GType pango_font_face_type = pango_font_face_get_type();
+    g_assert(pango_font_family_type > 0);
+    g_assert(pango_font_face_type > 0);
 }
 
 QVariant QGtk3Theme::themeHint(QPlatformTheme::ThemeHint hint) const
