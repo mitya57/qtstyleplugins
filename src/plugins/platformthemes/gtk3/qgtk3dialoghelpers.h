@@ -34,7 +34,11 @@
 #ifndef QGTK3DIALOGHELPERS_H
 #define QGTK3DIALOGHELPERS_H
 
+#include <QtCore/qhash.h>
+#include <QtCore/qlist.h>
+#include <QtCore/qurl.h>
 #include <QtCore/qscopedpointer.h>
+#include <QtCore/qstring.h>
 #include <qpa/qplatformdialoghelper.h>
 
 typedef struct _GtkDialog GtkDialog;
@@ -43,6 +47,7 @@ typedef struct _GtkFileFilter GtkFileFilter;
 QT_BEGIN_NAMESPACE
 
 class QGtk3Dialog;
+class QColor;
 
 class QGtk3ColorDialogHelper : public QPlatformColorDialogHelper
 {

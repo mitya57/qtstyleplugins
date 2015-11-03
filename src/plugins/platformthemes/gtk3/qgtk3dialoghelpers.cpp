@@ -83,6 +83,7 @@ QGtk3Dialog::QGtk3Dialog(GtkWidget *gtkWidget) : gtkWidget(gtkWidget)
 
 QGtk3Dialog::~QGtk3Dialog()
 {
+    gtk_clipboard_store(gtk_clipboard_get(GDK_SELECTION_CLIPBOARD));
     gtk_widget_destroy(gtkWidget);
 }
 
@@ -568,6 +569,7 @@ QFont QGtk3FontDialogHelper::currentFont() const
 
 void QGtk3FontDialogHelper::onAccepted()
 {
+    emit currentFontChanged(currentFont());
     emit accept();
     emit fontSelected(currentFont());
 }

@@ -44,6 +44,7 @@ public:
     QGtk3Theme();
 
     virtual QVariant themeHint(ThemeHint hint) const Q_DECL_OVERRIDE;
+    virtual QString gtkFontName() const Q_DECL_OVERRIDE;
 
     bool usePlatformNativeDialog(DialogType type) const Q_DECL_OVERRIDE;
     QPlatformDialogHelper *createPlatformDialogHelper(DialogType type) const Q_DECL_OVERRIDE;

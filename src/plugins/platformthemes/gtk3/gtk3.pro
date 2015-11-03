@@ -1,6 +1,7 @@
 TARGET = qgtk3
 
 PLUGIN_TYPE = platformthemes
+PLUGIN_EXTENDS = -
 PLUGIN_CLASS_NAME = QGtk3ThemePlugin
 load(qt_plugin)
 
